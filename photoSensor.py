@@ -14,9 +14,6 @@ import RPi.GPIO as GPIO, time, os
 import json
 import urllib2
 
-
-
-
 DEBUG = 1
 GPIO.setmode(GPIO.BCM)
 status = 0
