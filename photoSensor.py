@@ -13,11 +13,10 @@ from pubnub import Pubnub
 import RPi.GPIO as GPIO, time, os      
 import json
 import urllib2
-
 DEBUG = 1
 GPIO.setmode(GPIO.BCM)
 status = 0
-
+count=0
         
 
 
@@ -45,7 +44,7 @@ if __name__ == '__main__':
                 print("DISCONNECTED")
               
 
-        pubnub = Pubnub(publish_key="pub-c-d3bae2e1-d58c-457c-bee1-4fd8bb7c8992", subscribe_key="sub-c-915d6d7c-615c-11e5-9a34-02ee2ddab7fe")            
+        pubnub = Pubnub(publish_key="demo", subscribe_key="demo")            
         def RCtime (RCpin):
                 reading = 0
                 GPIO.setup(RCpin, GPIO.OUT)
@@ -60,8 +59,9 @@ if __name__ == '__main__':
                 
         while True:                                     
                 '''print RCtime(18)     # Read RC timing using pin #18'''
-              
-                if(RCtime(18)>350):
+                global count
+                count=count+1
+                if(RCtime(18)>300):
                         '''print 0'''
                         global status
                         status = 0
@@ -72,17 +72,19 @@ if __name__ == '__main__':
 
                 print status
                 photoData={
-                    "device_id" : "tv1",
-                    "device_type" : "tv",
+                    "device_id" : "ref",
+                    "device_type" : "refrigerator",
                     "channel" : "ch1",
                     "date" : "2016-04-12",
                     "value" : status }
-
-                req = urllib2.Request('http://10.0.0.227:4000/devices')
+                
+                req = urllib2.Request('http://10.0.0.228:4001/devices')
                 req.add_header('Content-Type', 'application/json')
-                response=urllib2.urlopen(req,json.dumps(photoData))
-                print 'response',response
+                if count%300==0:
+                        response=urllib2.urlopen(req,json.dumps(photoData))
+                        #print 'response',response
                 pubnub.subscribe(channels='my_channel', callback=callback, error=callback,connect=connect, reconnect=reconnect, disconnect=disconnect)
+
                 pubnub.publish('my_channel', {
                     'columns': [
                         ['x', time.time()],
